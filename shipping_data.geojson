@@ -1,0 +1,14 @@
+{
+"type": "FeatureCollection",
+"name": "shipping_data",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "vessel_name": "Arabian Pearl", "origin": "Jebel Ali", "destination": "Hamburg", "cargo": "Petrochemicals", "value_eur": 15800000, "dist_hamburg_nm": 3346, "status": "Suez Bound" }, "geometry": { "type": "Point", "coordinates": [ 54.05316033925692, 10.233187896223781 ] } },
+{ "type": "Feature", "properties": { "vessel_name": "Indus Voyager", "origin": "Mundra", "destination": "Hamburg", "cargo": "Textiles and Spices", "value_eur": 11500000, "dist_hamburg_nm": 3449, "status": "Suez Bound" }, "geometry": { "type": "Point", "coordinates": [ 57.94613287560589, 10.528977476191475 ] } },
+{ "type": "Feature", "properties": { "vessel_name": "Ocean Majestic", "origin": "Busan", "destination": "Hamburg", "cargo": "Industrial Machinery", "value_eur": 12200000, "dist_hamburg_nm": 7200, "status": "Cape Reroute" }, "geometry": { "type": "Point", "coordinates": [ 18.360487, -34.419328 ] } },
+{ "type": "Feature", "properties": { "vessel_name": "Northern Star", "origin": "Rotterdam", "destination": "Hamburg", "cargo": "Automotive Spare Parts", "value_eur": 7500000, "dist_hamburg_nm": 328, "status": "North Sea Hub" }, "geometry": { "type": "Point", "coordinates": [ 3.544268, 52.83137 ] } },
+{ "type": "Feature", "properties": { "vessel_name": "Baltic Carrier", "origin": "Antwerp", "destination": "Hamburg", "cargo": "Medical Equipment", "value_eur": 15300000, "dist_hamburg_nm": 398, "status": "North Sea Hub" }, "geometry": { "type": "Point", "coordinates": [ 3.156293, 52.531333 ] } },
+{ "type": "Feature", "properties": { "vessel_name": "London Trader", "origin": "Felixstowe", "destination": "Hamburg", "cargo": "Luxury Goods", "value_eur": 9200000, "dist_hamburg_nm": 398, "status": "English Channel" }, "geometry": { "type": "Point", "coordinates": [ 1.719633, 51.420307 ] } },
+{ "type": "Feature", "properties": { "vessel_name": "Elbe Feeder", "origin": "Bremerhaven", "destination": "Hamburg", "cargo": "Perishable Food Stuffs", "value_eur": 1200000, "dist_hamburg_nm": 210, "status": "Final Mile" }, "geometry": { "type": "Point", "coordinates": [ 5.521094, 54.83353 ] } }
+]
+}

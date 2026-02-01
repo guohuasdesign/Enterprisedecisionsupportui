@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Globe, 
   AlertTriangle, 
@@ -50,6 +50,7 @@ import {
 } from 'recharts';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { OpenAITest } from '../components/OpenAITest';
 
 // --- Utility ---
 function cn(...inputs: ClassValue[]) {
@@ -122,7 +123,7 @@ const RiskBadge = ({ level }: { level: string }) => {
 };
 
 // --- Screen 1: Situation Overview ---
-const SituationOverview = ({ onVesselClick }: any) => {
+const SituationOverview = ({ onVesselClick, onNavigateToTest }: any) => {
   return (
     <div className="flex flex-col h-full gap-4 p-4 overflow-hidden">
       <div className="flex-1 flex gap-4 min-h-0">
@@ -205,6 +206,15 @@ const SituationOverview = ({ onVesselClick }: any) => {
         {/* Right Panel - Quick Insight */}
         <div className="flex-1 flex flex-col gap-4">
           <div className="bg-[#121821] border border-white/10 p-4 flex flex-col gap-4">
+            {onNavigateToTest && (
+              <button 
+                onClick={onNavigateToTest}
+                className="w-full bg-green-600 hover:bg-green-600/90 text-white font-bold py-2 text-xs flex items-center justify-center gap-2 rounded mb-2 cursor-pointer"
+              >
+                <Settings size={14} />
+                TEST OPENAI API
+              </button>
+            )}
             <button className="w-full bg-[#4C8DFF] hover:bg-[#4C8DFF]/90 text-white font-bold py-3 text-sm flex items-center justify-center gap-2 rounded">
               <Zap size={16} />
               RUN SCENARIO ANALYSIS
@@ -1049,11 +1059,20 @@ export default function App() {
 
   const renderScreen = () => {
     switch(activeScreen) {
-      case 'situation': return <SituationOverview onVesselClick={(v: any) => { setSelectedVessel(v); setActiveScreen('analysis'); }} />;
+      case 'situation': return <SituationOverview onVesselClick={(v: any) => { setSelectedVessel(v); setActiveScreen('analysis'); }} onNavigateToTest={() => setActiveScreen('api-test')} />;
       case 'analysis': return <IncidentAnalysis eventId={activeIncident?.id} onGenerateScenarios={() => setActiveScreen('scenario-lab')} />;
       case 'scenario-lab': return <ScenarioLab onScenarioSelect={(s: any) => { setSelectedScenario(s); setActiveScreen('decision-center'); }} />;
       case 'decision-center': return <DecisionCenter selectedScenario={selectedScenario} onApprove={() => setActiveScreen('audit')} />;
       case 'audit': return <AuditHistory />;
+      case 'api-test': return (
+        <div className="flex flex-col h-full gap-4 p-4 overflow-auto">
+          <div className="flex items-center gap-2 mb-4">
+            <Settings size={20} className="text-[#4C8DFF]" />
+            <h1 className="text-xl font-bold text-white">OpenAI API Connection Test</h1>
+          </div>
+          <OpenAITest />
+        </div>
+      );
       default: return <SituationOverview />;
     }
   };
@@ -1134,6 +1153,12 @@ export default function App() {
             label="Audit & History" 
             active={activeScreen === 'audit'} 
             onClick={() => setActiveScreen('audit')}
+          />
+          <SidebarItem 
+            icon={Settings} 
+            label="API Test" 
+            active={activeScreen === 'api-test'} 
+            onClick={() => setActiveScreen('api-test')}
           />
           
           <div className="mt-auto p-4 border-t border-white/10">

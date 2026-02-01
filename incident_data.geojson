@@ -1,0 +1,10 @@
+{
+"type": "FeatureCollection",
+"name": "incident_data",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": "EVT-WX-0001", "feature_kind": "event" }, "geometry": { "type": "Point", "coordinates": [ 8.7, 53.868 ] } },
+{ "type": "Feature", "properties": { "id": "VSL-001", "feature_kind": "vessel" }, "geometry": { "type": "Point", "coordinates": [ 44.1, 11.2 ] } },
+{ "type": "Feature", "properties": { "id": "VSL-002", "feature_kind": "vessel" }, "geometry": { "type": "Point", "coordinates": [ -6.192497980613837, 34.669223841296542 ] } }
+]
+}
