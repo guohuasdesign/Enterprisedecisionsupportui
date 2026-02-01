@@ -1,0 +1,32 @@
+# Virtual environment (exclude from submission to keep repo small)
+hackathon/
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# IDE / editor
+.idea/
+.vscode/
+.cursor/
+*.swp
+*.swo
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific (optional: uncomment if you don't want to track)
+# data/*.geojson
+# map/shipping_map.html

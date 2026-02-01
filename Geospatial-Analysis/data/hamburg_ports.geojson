@@ -1,0 +1,85 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.995,
+          53.5535
+        ]
+      },
+      "properties": {
+        "name": "Steinwerder Terminal",
+        "theme": "Geoportal Hamburg",
+        "count": 1,
+        "color": "#7dd3fc"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.985,
+          53.548
+        ]
+      },
+      "properties": {
+        "name": "Waltershof Area",
+        "theme": "Geoportal Hamburg",
+        "count": 1,
+        "color": "#7dd3fc"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          10.005,
+          53.542
+        ]
+      },
+      "properties": {
+        "name": "Veddel Terminal",
+        "theme": "Geoportal Hamburg",
+        "count": 1,
+        "color": "#7dd3fc"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.98,
+          53.56
+        ]
+      },
+      "properties": {
+        "name": "Altona Port",
+        "theme": "Geoportal Hamburg",
+        "count": 1,
+        "color": "#7dd3fc"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          10.01,
+          53.535
+        ]
+      },
+      "properties": {
+        "name": "Harburg Harbor",
+        "theme": "Geoportal Hamburg",
+        "count": 1,
+        "color": "#7dd3fc"
+      }
+    }
+  ]
+}
