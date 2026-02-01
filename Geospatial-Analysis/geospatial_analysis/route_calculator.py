@@ -9,8 +9,6 @@ Run from project root: python geospatial_analysis/route_calculator.py
 import json
 import os
 import math
-from collections import defaultdict
-
 import networkx as nx
 from shapely.geometry import LineString, Point
 

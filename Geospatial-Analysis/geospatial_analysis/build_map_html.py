@@ -26,6 +26,8 @@ def main():
     ports = load_json(ports_path) if os.path.isfile(ports_path) else {"type": "FeatureCollection", "features": []}
     buffers_path = os.path.join(DATA_DIR, "incident_buffers.geojson")
     buffers = load_json(buffers_path) if os.path.isfile(buffers_path) else {"type": "FeatureCollection", "features": []}
+    alt_routes_path = os.path.join(DATA_DIR, "alternative_routes.geojson")
+    alt_routes = load_json(alt_routes_path) if os.path.isfile(alt_routes_path) else {"type": "FeatureCollection", "features": []}
 
     with open(os.path.join(MAP_DIR, "style.css"), "r", encoding="utf-8") as f:
         css = f.read()
@@ -36,6 +38,7 @@ def main():
     routes_js = json.dumps(routes)
     ports_js = json.dumps(ports)
     buffers_js = json.dumps(buffers)
+    alt_routes_js = json.dumps(alt_routes)
 
     html = """<!DOCTYPE html>
 <html lang="en">
@@ -58,13 +61,14 @@ def main():
     <div><span class="legend-swatch legend-buffer"></span> Incident buffer</div>
     <div><span class="legend-line legend-lane"></span> Shipping lanes</div>
     <div><span class="legend-line legend-route"></span> Ship routes</div>
+    <div><span class="legend-line legend-alt-route"></span> Alternative ship routes</div>
     <div><span class="legend-dot legend-port"></span> Hamburg ports</div>
   </div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script>
 (function () {
   'use strict';
-  var map, shipsLayer, incidentsLayer, lanesLayer, routesLayer, portsLayer;
+  var map, shipsLayer, incidentsLayer, lanesLayer, routesLayer, portsLayer, altRoutesLayer;
   var buffersLayer;
   var SHIPS_DATA = """ + ships_js + """;
   var INCIDENTS_DATA = """ + incidents_js + """;
@@ -72,6 +76,7 @@ def main():
   var ROUTES_DATA = """ + routes_js + """;
   var PORTS_DATA = """ + ports_js + """;
   var INCIDENT_BUFFERS_DATA = """ + buffers_js + """;
+  var ALT_ROUTES_DATA = """ + alt_routes_js + """;
 
   function toLatLng(c) {
     return c && c.length >= 2 ? [Number(c[1]), Number(c[0])] : null;
@@ -85,6 +90,7 @@ def main():
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19 }).addTo(map);
     lanesLayer = L.layerGroup().addTo(map);
     routesLayer = L.layerGroup().addTo(map);
+    altRoutesLayer = L.layerGroup().addTo(map);
     buffersLayer = L.layerGroup().addTo(map);
     incidentsLayer = L.layerGroup().addTo(map);
     shipsLayer = L.layerGroup().addTo(map);
@@ -167,6 +173,7 @@ def main():
 
   var laneStyle = { color: '#38bdf8', weight: 3, opacity: 0.9, dashArray: '5, 10' };
   var routeStyle = { color: '#059669', weight: 4, opacity: 0.9 };
+  var altRouteStyle = { color: '#ea580c', weight: 4, opacity: 0.9, dashArray: '8, 8' };
 
   function addRoutes(geojson) {
     if (!geojson || !geojson.features) return;
@@ -178,6 +185,20 @@ def main():
       var p = f.properties || {};
       var label = (p.vessel_name || 'Ship') + ': ' + (p.origin || '') + ' → ' + (p.destination || '');
       L.polyline(latlngs, routeStyle).bindPopup('<b>' + escapeHtml(label) + '</b>').addTo(routesLayer);
+    });
+  }
+
+  function addAltRoutes(geojson) {
+    if (!geojson || !geojson.features) return;
+    geojson.features.forEach(function (f) {
+      var g = f.geometry;
+      if (!g || g.type !== 'LineString' || !g.coordinates || g.coordinates.length < 2) return;
+      var latlngs = g.coordinates.map(toLatLng).filter(Boolean);
+      if (latlngs.length < 2) return;
+      var p = f.properties || {};
+      var label = (p.vessel_name || 'Ship') + ' (alternative): ' + (p.origin || '') + ' → ' + (p.destination || '');
+      if (p.reason) label += '<br><span style="color:#666;">' + escapeHtml(p.reason) + '</span>';
+      L.polyline(latlngs, altRouteStyle).bindPopup('<b>' + escapeHtml(label) + '</b>').addTo(altRoutesLayer);
     });
   }
 
@@ -229,6 +250,7 @@ def main():
   initMap();
   addLanes(LANES_DATA);
   addRoutes(ROUTES_DATA);
+  addAltRoutes(ALT_ROUTES_DATA);
   addIncidentBuffers(INCIDENT_BUFFERS_DATA);
   addIncidents(INCIDENTS_DATA);
   addShips(SHIPS_DATA);

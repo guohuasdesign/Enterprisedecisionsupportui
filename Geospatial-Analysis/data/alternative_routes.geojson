@@ -7,11 +7,16 @@
         "vessel_name": "Ocean Majestic",
         "origin": "Busan",
         "destination": "Hamburg",
-        "route_type": "shipping_lane"
+        "route_type": "alternative",
+        "reason": "incident_avoidance"
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
+          [
+            11.201837641357095,
+            -27.637419938994295
+          ],
           [
             11.215290949105668,
             -27.624531791587234
@@ -6745,11 +6750,16 @@
         "vessel_name": "Arabian Pearl",
         "origin": "Jebel Ali",
         "destination": "Hamburg",
-        "route_type": "shipping_lane"
+        "route_type": "alternative",
+        "reason": "incident_avoidance"
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
+          [
+            52.12098647011289,
+            6.850690925303248
+          ],
           [
             52.09436746736415,
             6.864040564409105
@@ -13955,11 +13965,16 @@
         "vessel_name": "Northern Star",
         "origin": "Rotterdam",
         "destination": "Hamburg",
-        "route_type": "shipping_lane"
+        "route_type": "alternative",
+        "reason": "incident_avoidance"
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
+          [
+            -12.628306744749807,
+            40.53253664420469
+          ],
           [
             -12.591599833119586,
             40.50551492665033
@@ -14237,11 +14252,16 @@
         "vessel_name": "Baltic Carrier",
         "origin": "Antwerp",
         "destination": "Hamburg",
-        "route_type": "shipping_lane"
+        "route_type": "alternative",
+        "reason": "incident_avoidance"
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
+          [
+            3.156293,
+            52.531333
+          ],
           [
             3.1562927727822725,
             52.53133329381348
@@ -14331,11 +14351,16 @@
         "vessel_name": "London Trader",
         "origin": "Felixstowe",
         "destination": "Hamburg",
-        "route_type": "shipping_lane"
+        "route_type": "alternative",
+        "reason": "incident_avoidance"
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
+          [
+            1.719633,
+            51.420307
+          ],
           [
             1.7196331041522526,
             51.42030686532153
@@ -14433,11 +14458,16 @@
         "vessel_name": "Elbe Feeder",
         "origin": "Bremerhaven",
         "destination": "Hamburg",
-        "route_type": "shipping_lane"
+        "route_type": "alternative",
+        "reason": "incident_avoidance"
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
+          [
+            5.521094,
+            54.83353
+          ],
           [
             5.521093965314595,
             54.83353002599105
