@@ -1,78 +1,78 @@
-# 启动前后端服务指南
+# Frontend and Backend Service Startup Guide
 
-## 检查服务状态
+## Check Service Status
 
-在终端运行以下命令检查服务是否在运行：
+Run the following commands in the terminal to check if services are running:
 
 ```bash
-# 检查前端 (端口 5173)
+# Check frontend (port 5173)
 lsof -i :5173
 
-# 检查后端 (端口 3000)
+# Check backend (port 3000)
 lsof -i :3000
 ```
 
-## 启动前端服务
+## Start Frontend Service
 
 ```bash
-# 在项目根目录
+# In project root directory
 cd "/Users/huaguo/MyFirstDirectory/Hachathon/Cursor AI Hachaton/Projekt 2_IDSS/Test_IDSS/Enterprisedecisionsupportui"
 
-# 启动 Vite 开发服务器
+# Start Vite development server
 npm run dev
 ```
 
-前端服务会在 `http://localhost:5173` 启动
+Frontend service will start at `http://localhost:5173`
 
-## 启动后端服务
+## Start Backend Service
 
 ```bash
-# 进入后端目录
+# Navigate to backend directory
 cd "/Users/huaguo/MyFirstDirectory/Hachathon/Cursor AI Hachaton/Projekt 2_IDSS/Test_IDSS/Enterprisedecisionsupportui/backend"
 
-# 确保已安装依赖
+# Ensure dependencies are installed
 npm install
 
-# 启动后端服务
+# Start backend service
 npm run dev
 ```
 
-后端服务会在 `http://localhost:3000` 启动
+Backend service will start at `http://localhost:3000`
 
-## 同时启动两个服务
+## Start Both Services Simultaneously
 
-打开两个终端窗口：
+Open two terminal windows:
 
-**终端 1 - 前端:**
+**Terminal 1 - Frontend:**
 ```bash
 cd "/Users/huaguo/MyFirstDirectory/Hachathon/Cursor AI Hachaton/Projekt 2_IDSS/Test_IDSS/Enterprisedecisionsupportui"
 npm run dev
 ```
 
-**终端 2 - 后端:**
+**Terminal 2 - Backend:**
 ```bash
 cd "/Users/huaguo/MyFirstDirectory/Hachathon/Cursor AI Hachaton/Projekt 2_IDSS/Test_IDSS/Enterprisedecisionsupportui/backend"
 npm run dev
 ```
 
-## 验证服务运行
+## Verify Services Are Running
 
-### 前端
-打开浏览器访问: `http://localhost:5173`
+### Frontend
+Open browser and visit: `http://localhost:5173`
 
-### 后端
+### Backend
 ```bash
-# 健康检查
+# Health check
 curl http://localhost:3000/health
 
-# 测试分析端点
+# Test analysis endpoint
 curl -X POST http://localhost:3000/run-analysis -H "Content-Type: application/json" -d '{}'
 ```
 
-## 当前状态
+## Current Status
 
-根据检查：
-- ✅ **前端**: 端口 5173 有进程在运行
-- ❌ **后端**: 端口 3000 没有服务运行
+Based on checks:
+- ✅ **Frontend**: Process running on port 5173
+- ❌ **Backend**: No service running on port 3000
 
-**需要启动后端服务！**
+**Backend service needs to be started!**

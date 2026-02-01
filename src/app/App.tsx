@@ -51,6 +51,7 @@ import {
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { OpenAITest } from '../components/OpenAITest';
+import { runAnalysis, checkBackendHealth } from '../services/analysisService';
 
 // --- Utility ---
 function cn(...inputs: ClassValue[]) {
@@ -123,7 +124,7 @@ const RiskBadge = ({ level }: { level: string }) => {
 };
 
 // --- Screen 1: Situation Overview ---
-const SituationOverview = ({ onVesselClick, onNavigateToTest }: any) => {
+const SituationOverview = ({ onVesselClick, onNavigateToTest, onRunAnalysis, isAnalyzing, backendAvailable }: any) => {
   return (
     <div className="flex flex-col h-full gap-4 p-4 overflow-hidden">
       <div className="flex-1 flex gap-4 min-h-0">
@@ -215,10 +216,28 @@ const SituationOverview = ({ onVesselClick, onNavigateToTest }: any) => {
                 TEST OPENAI API
               </button>
             )}
-            <button className="w-full bg-[#4C8DFF] hover:bg-[#4C8DFF]/90 text-white font-bold py-3 text-sm flex items-center justify-center gap-2 rounded">
-              <Zap size={16} />
-              RUN SCENARIO ANALYSIS
+            <button 
+              onClick={onRunAnalysis}
+              disabled={isAnalyzing || backendAvailable === false}
+              className="w-full bg-[#4C8DFF] hover:bg-[#4C8DFF]/90 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-bold py-3 text-sm flex items-center justify-center gap-2 rounded transition-colors"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Activity className="animate-spin" size={16} />
+                  ANALYZING...
+                </>
+              ) : (
+                <>
+                  <Zap size={16} />
+                  RUN SCENARIO ANALYSIS
+                </>
+              )}
             </button>
+            {backendAvailable === false && (
+              <div className="text-xs text-amber-400 text-center mt-2 p-2 bg-amber-500/10 border border-amber-500/20 rounded">
+                ⚠️ Backend not available. Start: <code className="text-amber-300">cd backend && npm run dev</code>
+              </div>
+            )}
             
             <div className="pt-2">
               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Top At-Risk Vessels</div>
@@ -1056,10 +1075,60 @@ export default function App() {
   const [selectedVessel, setSelectedVessel] = useState<any>(null);
   const [selectedScenario, setSelectedScenario] = useState<any>(null);
   const [activeIncident, setActiveIncident] = useState<any>(MOCK_EVENTS[0]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [backendAvailable, setBackendAvailable] = useState<boolean | null>(null);
+
+  // Check backend health on mount
+  useEffect(() => {
+    checkBackendHealth().then(setBackendAvailable);
+    // Check every 30 seconds
+    const interval = setInterval(() => {
+      checkBackendHealth().then(setBackendAvailable);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Handle analysis request
+  const handleRunAnalysis = async () => {
+    setIsAnalyzing(true);
+    setAnalysisResult(null);
+    try {
+      console.log('Starting analysis...');
+      const result = await runAnalysis();
+      setAnalysisResult(result);
+      console.log('Analysis completed:', result);
+      
+      if (result.success && result.scenarios && result.scenarios.length > 0) {
+        // Navigate to scenario lab with results
+        setSelectedScenario(result.scenarios[0]);
+        setActiveScreen('scenario-lab');
+      } else if (result.vessel_cargo_summary) {
+        // If n8n returned vessel_cargo_summary but no scenarios, show a message
+        alert(`Analysis completed!\n\n${result.vessel_cargo_summary}\n\nCheck console for full results.`);
+        console.log('Full n8n response:', result);
+      }
+    } catch (error) {
+      console.error('Analysis failed:', error);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      const serviceMsg = import.meta.env.VITE_USE_N8N !== 'false' 
+        ? 'Make sure n8n is running on http://localhost:5678 and workflow is activated'
+        : 'Make sure backend is running on http://localhost:3000';
+      alert(`Analysis failed: ${errorMsg}\n\n${serviceMsg}`);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   const renderScreen = () => {
     switch(activeScreen) {
-      case 'situation': return <SituationOverview onVesselClick={(v: any) => { setSelectedVessel(v); setActiveScreen('analysis'); }} onNavigateToTest={() => setActiveScreen('api-test')} />;
+      case 'situation': return <SituationOverview 
+        onVesselClick={(v: any) => { setSelectedVessel(v); setActiveScreen('analysis'); }} 
+        onNavigateToTest={() => setActiveScreen('api-test')}
+        onRunAnalysis={handleRunAnalysis}
+        isAnalyzing={isAnalyzing}
+        backendAvailable={backendAvailable}
+      />;
       case 'analysis': return <IncidentAnalysis eventId={activeIncident?.id} onGenerateScenarios={() => setActiveScreen('scenario-lab')} />;
       case 'scenario-lab': return <ScenarioLab onScenarioSelect={(s: any) => { setSelectedScenario(s); setActiveScreen('decision-center'); }} />;
       case 'decision-center': return <DecisionCenter selectedScenario={selectedScenario} onApprove={() => setActiveScreen('audit')} />;

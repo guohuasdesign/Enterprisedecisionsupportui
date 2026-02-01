@@ -1,0 +1,776 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "trigger-scan",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "699fabe7-8cc5-4fe4-a8e0-6eeef9f9e03b",
+      "name": "Webhook",
+      "webhookId": "636ca0a2-e126-4e36-acf5-432f6d62af26",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Strategic Audit Context:\n- Target Port: {{ $json.audit_context.target_port }}\n- Current Position: {{ $json.audit_context.current_ship_position_nm }}nm from port\n- Backup Intel: {{ $json.demo_backup }}\n\nOfficer Task: \n1. Perform a live search for January 2026 geopolitical threats or weather events affecting ships bound for {{ $json.audit_context.target_port }}.\n2. Determine if the disruption is Geopolitical (Priority 1) or Weather-based (Priority 2).\n3. If search is unavailable, use the Backup Intel.",
+        "options": {
+          "systemMessage": "Role: Strategic Maritime Intelligence Officer.\nCurrent Date: January 31, 2026.\n\nSTRICT OUTPUT RULE:\nYou must output ONLY a valid JSON object. \nNO markdown code blocks. NO triple backticks (```). NO \"Here is the result\".\nStart your response with { and end it with }.\n\nHierarchy of Disruptions:\n1. GEOPOLITICAL (HIGHEST): Search for \"GNSS interference Baltic Sea Jan 2026\".\n2. WEATHER (SECONDARY): Search for \"Storm Elli Hamburg rail\".\n3. FALLBACK: Use 'demo_backup' from input if search fails.\n\nJSON STRUCTURE TO IMITATE:\n{\n  \"is_disrupted\": true,\n  \"reason\": \"text here\",\n  \"affected_ship\": \"Elbe Feeder\"\n}",
+          "maxIterations": 2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        880,
+        -96
+      ],
+      "id": "397c5ba2-6ce7-4f5e-83c5-838d6389cb34",
+      "name": "AI Agent",
+      "alwaysOutputData": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-lite",
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        944,
+        1456
+      ],
+      "id": "43506ae4-353c-4525-9bf9-6db1c3bce414",
+      "name": "Google Gemini Chat Model",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "UR7j12gdKaUwecRe",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"is_disrupted\": {\n      \"type\": \"boolean\"\n    },\n    \"reason\": {\n      \"type\": \"string\"\n    },\n    \"affected_ship\": {\n      \"type\": \"string\",\n      \"description\": \"Name of the ship or 'General Fleet'\"\n    }\n  },\n  \"required\": [\n    \"is_disrupted\",\n    \"reason\",\n    \"affected_ship\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1024,
+        144
+      ],
+      "id": "5856ed65-758a-462d-8109-261c95410399",
+      "name": "Structured Output Parser",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a941532e-c0e2-4c4d-8fc0-04ecd46eae8e",
+              "leftValue": "={{ $json.is_disrupted }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1600,
+        -32
+      ],
+      "id": "ec782de0-c3c5-468f-8c21-22cea52c1dac",
+      "name": "If",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n// Grab the Blue Neptune data from features[1]\nreturn {\n  audit_context: {\n    target_port: \"Hamburg\",\n    current_ship_position_nm: 450\n  },\n  demo_backup: \"CRITICAL FALLBACK: Storm Elli icing and rail blockage confirmed in Hamburg, January 2026.\"\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -80
+      ],
+      "id": "2a55d789-a91a-4e42-99f3-9865529f3cbf",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        912,
+        288
+      ],
+      "id": "a5c23a5f-4059-4e6e-a6d0-5b36e865a556",
+      "name": "SerpAPI",
+      "credentials": {
+        "serpApi": {
+          "id": "dGA2nZiKezFJ9Tyu",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"penalty_issued\": { \"type\": \"boolean\" },\n    \"responsible_party\": { \"type\": \"string\", \"enum\": [\"Sender\", \"Receiver\", \"Carrier\", \"None\"] },\n    \"clause_reference\": { \"type\": \"string\", \"description\": \"The specific Section or Article number\" },\n    \"explanation\": { \"type\": \"string\", \"description\": \"Brief summary of the legal measure\" }\n  },\n  \"required\": [\"penalty_issued\", \"responsible_party\", \"clause_reference\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2656,
+        -32
+      ],
+      "id": "f796ec45-a3c1-4b54-be13-29abdf63e19c",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        608,
+        -80
+      ],
+      "id": "4eb35e25-4ab7-407d-9d84-a26062554b31",
+      "name": "Wait",
+      "webhookId": "4fec2bd7-bf4e-451b-a1e9-90190b40a902"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "llama-3.3-70b",
+          "mode": "list",
+          "cachedResultName": "llama-3.3-70b"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        736,
+        112
+      ],
+      "id": "5025f4eb-0337-40bd-8478-5f04b13a9c61",
+      "name": "OpenAI Chat Model",
+      "alwaysOutputData": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "T6BhdnVWs0gFdpi9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "llama-3.3-70b",
+          "mode": "list",
+          "cachedResultName": "llama-3.3-70b"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        2384,
+        -48
+      ],
+      "id": "dced2d93-a56d-47c5-a8d0-7cc3354b01ca",
+      "name": "OpenAI Chat Model1",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "T6BhdnVWs0gFdpi9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "llama-3.3-70b",
+          "mode": "list",
+          "cachedResultName": "llama-3.3-70b"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        2304,
+        336
+      ],
+      "id": "7682b939-1358-449e-a823-bedddf95a6a2",
+      "name": "OpenAI Chat Model2",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "T6BhdnVWs0gFdpi9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ \n\"### INCIDENT TRIGGER (FROM IF-NODE) ###\\n\" + \nJSON.stringify($('If').item.json, null, 2) + \n\n\"\\n\\n### LEGAL FILE (SOURCE DATA) ###\\n\" + \nJSON.stringify($('legal data').item.json, null, 2) + \n\n\"\\n\\n### TASK ###\\n\" +\n\"1. Identify the 'reason' for disruption in the Incident Trigger.\\n\" +\n\"2. Search the Legal File for matching Force Majeure or Deviation clauses.\\n\" +\n\"3. Determine if the Carrier is liable for the €100,000/day penalty based on those clauses.\"\n}}",
+        "options": {
+          "systemMessage": "Role: Legal Analyst specializing in contract auditing.\nCurrent Date: January 31, 2026.\n\nOPERATIONAL PROTOCOL:\n1. INPUT SCAN: Look at the \"INCIDENT\" (from If-node). Identify the 'reason' (e.g., GNSS Interference).\n2. CONTRACT AUDIT: Scan the \"CONTRACT SOURCE DATA\" for sections 8.3 and 17.4 specifically.\n3. ADJUDICATION: \n   - Rule 1: GNSS Interference is an intentional geopolitical act (Electronic Warfare). \n   - Rule 2: Section 8.3 only excuses \"Acts of God\" (Weather) or \"War.\" \n   - Rule 3: Unless \"War\" is officially declared in the Incident data, GNSS Interference does NOT qualify for Force Majeure.\n\nSTRICT OUTPUT RULE:\n- Output ONLY raw JSON. No markdown backticks.\n- Start with { and end with }.\n\nJSON STRUCTURE:\n{\n  \"penalty_issued\": \"Yes/No\",\n  \"responsible_party\": \"Carrier\",\n  \"clause_reference\": \"Section 8.3 / 17.4\",\n  \"explanation\": \"State if the If-node trigger meets the Force Majeure criteria found in the legal file.\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2496,
+        -272
+      ],
+      "id": "02f5c5a8-33aa-45bf-abb4-144bdeb01876",
+      "name": "Law Agent",
+      "alwaysOutputData": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ \n\"### FLEET DATASET ###\\n\" + \nJSON.stringify($('ERPdata').item.json.fleet, null, 2) + \n\n\"\\n\\n### ANALYSIS REQUEST ###\\n\" +\n\"1. Search the dataset for any ship < 500nm from Hamburg.\\n\" +\n\"2. If found, extract its details.\\n\" +\n\"3. If none are found, output the Elbe Feeder (210nm, Perishable Food, €1.2M) as the critical vessel.\"\n}}",
+        "options": {
+          "systemMessage": "Role: ERP Data Extraction & Logistics Expert.\nCurrent Date: February 1, 2026.\n\nTASK:\nIdentify the highest-risk vessel from the 'Lena_Crisis_Fleet_ERP' dataset based on proximity to the disruption zone.\n\nINSTRUCTIONS:\n1. SCAN: Look at the 'dist_hamburg_nm' for all vessels in the fleet.\n2. FILTER: Identify the ship where 'dist_hamburg_nm' is LESS THAN 500.\n3. FALLBACK: If NO ship is found under 500nm, you MUST hardcode and output the \"Elbe Feeder\" data to ensure continuity.\n\nOUTPUT RULE:\n- Output ONLY a raw JSON object.\n- NO conversational filler. NO markdown backticks (```).\n- Use the exact structure below.\n\nREQUIRED JSON STRUCTURE:\n{\n  \"vessel_name\": \"string\",\n  \"cargo_type\": \"string\",\n  \"cargo_value_eur\": number,\n  \"distance_to_hamburg_nm\": number,\n  \"risk_level\": \"Critical\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2384,
+        160
+      ],
+      "id": "7fbd0ddb-98f2-4214-ad81-fd779561514d",
+      "name": "ERP Agent",
+      "executeOnce": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawERPData = [\n  {\n  \"type\": \"FeatureCollection\",\n  \"name\": \"Lena_Crisis_Fleet_ERP\",\n  \"features\": [\n    {\n      \"type\": \"Feature\",\n      \"properties\": {\n        \"vessel_name\": \"Pacific Star\",\n        \"origin\": \"Shanghai\",\n        \"destination\": \"Hamburg\",\n        \"cargo\": \"EV Battery Cells\",\n        \"value_eur\": 28000000,\n        \"dist_hamburg_nm\": 4200,\n        \"status\": \"Suez/Danger Zone\"\n      },\n      \"geometry\": { \"type\": \"Point\", \"coordinates\": [42.15, 13.05] }\n    },\n    {\n      \"type\": \"Feature\",\n      \"properties\": {\n        \"vessel_name\": \"Blue Neptune\",\n        \"origin\": \"Singapore\",\n        \"destination\": \"Hamburg\",\n        \"cargo\": \"Semiconductors\",\n        \"value_eur\": 45000000,\n        \"dist_hamburg_nm\": 4500,\n        \"status\": \"Suez/Danger Zone\"\n      },\n      \"geometry\": { \"type\": \"Point\", \"coordinates\": [45.30, 11.50] }\n    },\n    {\n      \"type\": \"Feature\",\n      \"properties\": {\n        \"vessel_name\": \"Ever Given 2\",\n        \"origin\": \"Ningbo\",\n        \"destination\": \"Hamburg\",\n        \"cargo\": \"Consumer Electronics\",\n        \"value_eur\": 18500000,\n        \"dist_hamburg_nm\": 3800,\n        \"status\": \"Red Sea\"\n      },\n      \"geometry\": { \"type\": \"Point\", \"coordinates\": [38.20, 16.10] }\n    },\n    {\n      \"type\": \"Feature\",\n      \"properties\": {\n        \"vessel_name\": \"Ocean Majestic\",\n        \"origin\": \"Busan\",\n        \"destination\": \"Hamburg\",\n        \"cargo\": \"Industrial Machinery\",\n        \"value_eur\": 12200000,\n        \"dist_hamburg_nm\": 7200,\n        \"status\": \"Cape Reroute\"\n      },\n      \"geometry\": { \"type\": \"Point\", \"coordinates\": [18.42, -34.35] }\n    },\n    {\n      \"type\": \"Feature\",\n      \"properties\": {\n        \"vessel_name\": \"Hamburg Express\",\n        \"origin\": \"Colombo\",\n        \"destination\": \"Hamburg\",\n        \"cargo\": \"Textiles & Apparel\",\n        \"value_eur\": 48000000,\n        \"dist_hamburg_nm\": 6500,\n        \"status\": \"Cape Reroute\"\n      },\n      \"geometry\": { \"type\": \"Point\", \"coordinates\": [12.00, -30.00] }\n    },\n    {\n      \"type\": \"Feature\",\n      \"properties\": {\n        \"vessel_name\": \"Northern Star\",\n        \"origin\": \"Rotterdam\",\n        \"destination\": \"Hamburg\",\n        \"cargo\": \"Automotive Spare Parts\",\n        \"value_eur\": 7500000,\n        \"dist_hamburg_nm\": 7328,\n        \"status\": \"North Sea Hub\"\n      },\n      \"geometry\": { \"type\": \"Point\", \"coordinates\": [4.28, 51.88] }\n    },\n    {\n      \"type\": \"Feature\",\n      \"properties\": {\n        \"vessel_name\": \"Baltic Carrier\",\n        \"origin\": \"Antwerp\",\n        \"destination\": \"Hamburg\",\n        \"cargo\": \"Medical Equipment\",\n        \"value_eur\": 15300000,\n        \"dist_hamburg_nm\": 2398,\n        \"status\": \"North Sea Hub\"\n      },\n      \"geometry\": { \"type\": \"Point\", \"coordinates\": [4.24, 51.13] }\n    },\n    {\n      \"type\": \"Feature\",\n      \"properties\": {\n        \"vessel_name\": \"London Trader\",\n        \"origin\": \"Felixstowe\",\n        \"destination\": \"Hamburg\",\n        \"cargo\": \"Luxury Goods\",\n        \"value_eur\": 9200000,\n        \"dist_hamburg_nm\": 1098,\n        \"status\": \"English Channel\"\n      },\n      \"geometry\": { \"type\": \"Point\", \"coordinates\": [1.31, 51.95] }\n    },\n    {\n      \"type\": \"Feature\",\n      \"properties\": {\n        \"vessel_name\": \"Elbe Feeder\",\n        \"origin\": \"Bremerhaven\",\n        \"destination\": \"Hamburg\",\n        \"cargo\": \"Perishable Food Stuffs\",\n        \"value_eur\": 1200000,\n        \"dist_hamburg_nm\": 210,\n        \"status\": \"Final Mile\"\n      },\n      \"geometry\": { \"type\": \"Point\", \"coordinates\": [6.50, 54.10] }\n    }\n  ]\n}\n];\n\n// We return ONE item that contains the WHOLE list\nreturn {\n  full_fleet_data: rawERPData\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        160
+      ],
+      "id": "fe87f847-0c81-4e0f-8b77-9ceacb21aad3",
+      "name": "ERPdata",
+      "alwaysOutputData": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const contractData = {\n  \"title\": \"Contract Template A: The Strict Standard\",\n  \"type\": \"International Logistics Service Agreement (LSA)\",\n  \"logic\": \"Time-bound, Penalty-heavy, Zero-tolerance\",\n  \"sections\": [\n    {\n      \"section_number\": 8,\n      \"section_title\": \"DELIVERY GUARANTEES & PENALTIES\",\n      \"subsections\": [\n        {\n          \"subsection\": \"8.1\",\n          \"title\": \"Guaranteed Time of Arrival (GTA)\",\n          \"content\": \"The Carrier guarantees that the Cargo shall arrive at the [PORT_OF_DISCHARGE] no later than the date specified in the Booking Confirmation (\\\"Guaranteed Date\\\"). Time is of the essence in this Agreement.\"\n        },\n        {\n          \"subsection\": \"8.2\",\n          \"title\": \"Liquidated Damages for Delay\",\n          \"content\": \"In the event of late delivery beyond the Guaranteed Date, the Carrier shall be liable to pay Liquidated Damages calculated at the rate of {{HIGH_PENALTY_RATE}} per day (e.g., €100,000/day). The Parties agree that this sum represents a genuine pre-estimate of loss likely to be suffered by the Merchant due to production stoppages.\"\n        },\n        {\n          \"subsection\": \"8.3\",\n          \"title\": \"Force Majeure & Exclusions\",\n          \"content\": \"The Carrier shall only be relieved of liability under Clause 8.2 if the delay is caused by: (a) Act of God; (b) War or Hostilities; or (c) Government Seizure. Strikes, lockouts, or labor shortages shall NOT constitute Force Majeure events unless they are general strikes affecting the entire country.\"\n        }\n      ]\n    },\n    {\n      \"section_number\": 17,\n      \"section_title\": \"WAR RISKS & DEVIATION\",\n      \"subsections\": [\n        {\n          \"subsection\": \"17.4\",\n          \"title\": \"Right to Deviate\",\n          \"content\": \"The Carrier shall have the liberty to deviate from the advertised route only if reasonably necessary to preserve the safety of the Vessel or Crew. Any deviation adding more than {{MAX_DEVIATION_DAYS}} days to the transit time requires prior written notice to the Merchant within 2 hours of the decision.\"\n        }\n      ]\n    }\n  ],\n  \"placeholders\": [\n    \"PORT_OF_DISCHARGE\",\n    \"HIGH_PENALTY_RATE\",\n    \"MAX_DEVIATION_DAYS\"\n  ],\n  \"metadata\": {\n    \"source\": \"Contract Template A.pdf\",\n    \"pages\": 1\n  }\n};\n\n// This ensures n8n passes the data forward correctly\nreturn {\n  contract: contractData\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1984,
+        -48
+      ],
+      "id": "77cf3fad-16c0-4bdb-8ba0-1d827c9fd1aa",
+      "name": "legal data",
+      "alwaysOutputData": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// This cleans the AI output and forces it into a JSON object\nlet rawOutput = $input.item.json.output || $input.item.json.text;\n\n// 1. Remove common AI \"wrappers\" like triple backticks\nlet cleanOutput = rawOutput.replace(/```json|```/g, \"\").trim();\n\ntry {\n  // 2. Parse the string into a real JSON object\n  const parsedData = JSON.parse(cleanOutput);\n  return { \n    is_disrupted: parsedData.is_disrupted,\n    reason: parsedData.reason,\n    affected_ship: parsedData.affected_ship || \"Elbe Feeder\"\n  };\n} catch (e) {\n  // 3. EMERGENCY FALLBACK: If AI output is totally broken, hardcode the Elbe Feeder\n  return {\n    is_disrupted: true,\n    reason: \"Fallback triggered: Live data stream format error.\",\n    affected_ship: \"Elbe Feeder\"\n  };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        -96
+      ],
+      "id": "7d92a946-4811-4cba-a463-9e3282e93187",
+      "name": "Code in JavaScript",
+      "alwaysOutputData": true,
+      "executeOnce": false,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Cleans the AI text and turns it into n8n data\nlet rawText = $input.item.json.output || $input.item.json.text;\nlet cleanJSON = rawText.replace(/```json|```/g, \"\").trim();\n\ntry {\n  return JSON.parse(cleanJSON);\n} catch (e) {\n  // Demo Fallback: If the GNSS Jamming makes the AI fail, we hardcode the penalty\n  return {\n    penalty_issued: \"Yes\",\n    responsible_party: \"Carrier\",\n    clause_reference: \"Section 8.3\",\n    explanation: \"Incident (GNSS Interference) is geopolitical, not an Act of God. Penalty applies.\"\n  };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2848,
+        -272
+      ],
+      "id": "ac2e4679-0ca6-4858-8d6e-cfaf624cf792",
+      "name": "Code in JavaScript2",
+      "alwaysOutputData": true,
+      "executeOnce": false,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "let text = $input.item.json.output || $input.item.json.text;\nlet clean = text.replace(/```json|```/g, \"\").trim();\n\ntry {\n  return JSON.parse(clean);\n} catch (e) {\n  // Fallback if AI makes a typo\n  return {\n    vessel_name: \"Elbe Feeder\",\n    cargo_type: \"Perishable Food\",\n    cargo_value_eur: 1200000,\n    distance_to_hamburg_nm: 210,\n    risk_level: \"Critical\"\n  };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2736,
+        160
+      ],
+      "id": "641f9aac-9ee3-4b49-b7aa-460b90b3e111",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all incoming items (Law + ERP outputs)\nconst items = $input.all();\n\n// Container for merged result\nlet mergedData = {};\n\n// Loop safely through each item\nfor (const item of items) {\n    if (item && item.json && typeof item.json === 'object') {\n        Object.assign(mergedData, item.json);\n    }\n}\n\n// Always return ONE item so AI runs only once\nreturn [\n    {\n        json: mergedData\n    }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3152,
+        -64
+      ],
+      "id": "fdd50962-392e-4054-8aba-580f549f0401",
+      "name": "Code in JavaScript4",
+      "alwaysOutputData": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ \n\"### ERP DATA RECEIVED ###\\n\" + \n\"Vessel: \" + $json.vessel_name + \"\\n\" +\n\"Cargo Type: \" + $json.cargo_type + \"\\n\\n\" +\n\n\"### TASK ###\\n\" +\n\"1. Start the JSON with the 'vessel_cargo_summary' field using the info above.\\n\" +\n\"2. Use SerpApi to find 3 ways to mitigate loss for \" + $json.cargo_type + \" if the ship cannot reach Hamburg on time.\\n\" +\n\"3. Focus on land-based bypasses or alternative ports for this specific cargo.\"\n}}",
+        "options": {
+          "systemMessage": "Role: Lead Supply Chain Crisis Manager (Specializing in Perishables).\nCurrent Date: February 1, 2026.\n\nTASK:\nIdentify 3 AGGRESSIVE tactical solutions to save the \"Elbe Feeder\" cargo. \n\nOUTPUT RULE:\n- Return ONLY raw JSON. No markdown.\n- The very FIRST field of the JSON must be \"vessel_cargo_summary\".\n- Base all \"Feasibility Data\" on current February 2026 conditions (e.g., Hamburg ice build-up, 1.58-day average wait times, and upcoming Feb 6th strikes).\n\nREQUIRED JSON SCHEMA:\n{\n  \"vessel_cargo_summary\": \"A mandatory first-line statement: 'The vessel [VESSEL NAME] contains [CARGO TYPE] and is currently under critical risk.'\",\n  \"mitigation_strategies\": [\n    {\n      \"method\": \"Strategic Action Name\",\n      \"tactical_steps\": \"Immediate steps to take in the next 12 hours\",\n      \"why_it_works\": \"Specific reason this prevents spoilage or stops the legal penalty\",\n      \"estimated_loss_reduction\": \"EUR or % value\",\n      \"ai_confidence_score\": \"0-100%\",\n      \"feasibility_data\": \"Search-backed data (e.g., 'Cuxhaven berths available for feeder vessels; road transit to HH is 2 hours')\"\n    }\n  ]\n}",
+          "returnIntermediateSteps": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        3360,
+        -64
+      ],
+      "id": "1bfd9534-1d88-47d9-9d45-8f81f93d8c21",
+      "name": "AI Agent1",
+      "alwaysOutputData": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "llama-3.3-70b",
+          "mode": "list",
+          "cachedResultName": "llama-3.3-70b"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        3232,
+        144
+      ],
+      "id": "94fcc95d-d4bc-4f97-b042-c27eda2f63b8",
+      "name": "OpenAI Chat Model3",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "T6BhdnVWs0gFdpi9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        3520,
+        144
+      ],
+      "id": "8f155fef-4d0e-4d53-9019-5a9975fe47c1",
+      "name": "SerpAPI1",
+      "credentials": {
+        "serpApi": {
+          "id": "dGA2nZiKezFJ9Tyu",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// MODIFIED: We now target the first item explicitly using .first()\nlet text = $input.first().json.output; \n\n// The rest of your logic stays EXACTLY the same\nlet clean = text.replace(/```json|```/g, \"\").trim();\n\n// Find the first '{' and last '}' to isolate the JSON block\nlet start = clean.indexOf('{');\nlet end = clean.lastIndexOf('}');\nlet jsonString = clean.substring(start, end + 1);\n\ntry {\n  // Wrap the result in an array [ ] so n8n outputs exactly 1 item\n  return [{ json: JSON.parse(jsonString) }];\n} catch (e) {\n  // If the AI fails, return a safe fallback so the frontend doesn't crash\n  return [{ json: { error: \"Failed to parse strategies\", raw: text } }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3712,
+        -64
+      ],
+      "id": "d57babdc-7485-4fc6-8110-e9152b1c22e6",
+      "name": "Code in JavaScript5",
+      "alwaysOutputData": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        4336,
+        -64
+      ],
+      "id": "6b061b1b-c3c4-4041-8add-aa74cf805041",
+      "name": "Respond to Webhook",
+      "alwaysOutputData": true,
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// Combine all AI outputs into one object\nlet combined = {\n  answers: []\n};\n\nfor (const item of items) {\n  combined.answers.push(item.json);\n}\n\nreturn [{ json: combined }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3920,
+        -64
+      ],
+      "id": "0339b4da-ccf6-4cfa-9d19-087fc3ae19c5",
+      "name": "Code in JavaScript6",
+      "alwaysOutputData": true,
+      "retryOnFail": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        []
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "ERPdata",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "legal data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        []
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Law Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "ERP Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ERPdata": {
+      "main": [
+        [
+          {
+            "node": "ERP Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "legal data": {
+      "main": [
+        [
+          {
+            "node": "Law Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Law Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ERP Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript5": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript6": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "45df7ddd-7d04-4d35-afe5-c061d46492ae",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "245b0b0b3a3670006e0bf45d13eabdee32deaccba1800623b7d484ce1ed36d6c"
+  },
+  "id": "EIAW52nFhSKhPbAGSdfwl",
+  "tags": []
+}
